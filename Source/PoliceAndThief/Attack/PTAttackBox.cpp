@@ -23,13 +23,13 @@ void APTAttackBox::BeginPlay()
 {
 	Super::BeginPlay();
     
-	GetWorld()->GetTimerManager().SetTimer(
-		LifeTimeTimerHandle,
-		this,
-		&APTAttackBox::Destroy,
-		LifeTime,
-		false
-	);
+	// GetWorld()->GetTimerManager().SetTimer(
+	// 	LifeTimeTimerHandle,
+	// 	this,
+	// 	&APTAttackBox::Destroy,
+	// 	LifeTime,
+	// 	false
+	// );
 }
 
 void APTAttackBox::OnAttackBoxOverlap(UPrimitiveComponent* OverlappedComp, 
@@ -53,6 +53,6 @@ void APTAttackBox::OnAttackBoxOverlap(UPrimitiveComponent* OverlappedComp,
 		HitActors.Add(OtherActor);
         
 		// 캐릭터의 사망 처리 함수 호출
-		HitCharacter->OnHitByAttack();
+		// HitCharacter->OnHitByAttack();
 	}
 }

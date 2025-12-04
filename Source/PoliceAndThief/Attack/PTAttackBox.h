@@ -4,6 +4,8 @@
 #include "GameFramework/Actor.h"
 #include "PTAttackBox.generated.h"
 
+
+class UBoxComponent;
 // PTAttackBox.h
 UCLASS()
 class POLICEANDTHIEF_API APTAttackBox : public AActor
