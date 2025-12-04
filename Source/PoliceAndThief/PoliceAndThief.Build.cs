@@ -8,6 +8,14 @@ public class PoliceAndThief : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine",
+			//Input
+			"InputCore", "EnhancedInput",
+			//AI
+			"AIModule", "NavigationSystem",
+			//UI
+			"UMG",
+		});
+		PublicIncludePaths.AddRange(new string[] { "PoliceAndThief" });
 	}
 }
