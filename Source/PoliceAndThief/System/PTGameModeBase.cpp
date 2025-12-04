@@ -41,7 +41,6 @@ void APTGameModeBase::PostLogin(APlayerController* NewPlayer)
 	if (IsValid(PTPC))
 	{
 		AlivePlayerControllers.Add(PTPC);
-		RemainWaitingTimeForPlaying = WaitingTime;
 	}
 }
 
@@ -134,7 +133,7 @@ void APTGameModeBase::OnMainTimerElapsed()
 				}
 				
 				if (IsValid(SpawnBox))
-				{					
+				{
 					SpawnBox->SpawnAICharacter(30);
 					bAlreadySpawned = true;
 				}

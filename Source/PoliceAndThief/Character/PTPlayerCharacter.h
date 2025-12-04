@@ -58,12 +58,13 @@ private:
 #pragma region Attack
 	
 public:
+	UFUNCTION(Server, Reliable)
+	void ServerRPCCheckAttackHit();
+	
 	void CheckAttackHit();
 	
 	void OnHitByAttack();
 private:
-	void DrawDebugMeleeAttack(const FColor& DrawColor, FVector TraceStart, FVector TraceEnd, FVector Forward);
-
 	UFUNCTION(Server, Reliable)
 	void ServerRPCAttack();
 	

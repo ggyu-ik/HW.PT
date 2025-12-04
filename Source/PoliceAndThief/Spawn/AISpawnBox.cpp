@@ -13,8 +13,8 @@ AAISpawnBox::AAISpawnBox()
 	
 	SpawningBox = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	SpawningBox->SetupAttachment(SceneComponent);
-	SpawningBox->SetBoxExtent(FVector(1400.0f, 1600.0f, 100.0f)); // 기본 크기 설정
-	SpawningBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 스폰 박스는 충돌 불필요	
+	SpawningBox->SetBoxExtent(FVector(1400.0f, 1600.0f, 100.0f));
+	SpawningBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);	
 }
 
 void AAISpawnBox::SpawnAICharacter(int32 SpawnCount)

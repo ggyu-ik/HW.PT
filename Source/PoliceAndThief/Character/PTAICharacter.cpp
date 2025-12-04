@@ -5,6 +5,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Particles/ParticleSystem.h"
+#include "Kismet/GameplayStatics.h"
 
 APTAICharacter::APTAICharacter() : bIsDead(false)
 {
@@ -23,7 +25,6 @@ APTAICharacter::APTAICharacter() : bIsDead(false)
 		GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	}
 	
-	// Mesh가 클라이언트에서도 애니메이션을 업데이트하도록 설정
 	if (GetMesh())
 	{
 		GetMesh()->SetComponentTickEnabled(true);
@@ -33,7 +34,6 @@ APTAICharacter::APTAICharacter() : bIsDead(false)
 		GetMesh()->SetTickGroup(ETickingGroup::TG_PrePhysics);
 	}
 }
-
 void APTAICharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -57,26 +57,26 @@ void APTAICharacter::OnHitByAttack()
 	
 	bIsDead = true;
 	
-	// 모든 클라이언트에 사망 처리
 	MulticastRPCDie();
 	
-	// 바로 Destroy
 	Destroy();
 }
 
 void APTAICharacter::MulticastRPCDie_Implementation()
 {
-	// 이동 비활성화
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
 	
-	// 콜리전 비활성화
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	// AI 컨트롤러 비활성화
 	AController* AIController = GetController();
 	if (IsValid(AIController))
 	{
 		AIController->UnPossess();
+	}
+	
+	if (IsValid(Particle))
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Particle, GetActorLocation(), GetActorRotation());
 	}
 }

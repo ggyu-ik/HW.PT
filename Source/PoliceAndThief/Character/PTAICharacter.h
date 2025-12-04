@@ -4,6 +4,8 @@
 #include "GameFramework/Character.h"
 #include "PTAICharacter.generated.h"
 
+class UParticleSystem;
+
 UCLASS()
 class POLICEANDTHIEF_API APTAICharacter : public ACharacter
 {
@@ -21,4 +23,9 @@ private:
 	void MulticastRPCDie();
 	
 	bool bIsDead;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Meta = (AllowPrivateAccess))
+	TObjectPtr<UParticleSystem> Particle;
+	
+	
 };

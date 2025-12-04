@@ -64,7 +64,6 @@ void APTPlayerController::ClientRPCShowGameResultWidget_Implementation(int32 InR
 				GameResultUI->RankingText->SetText(FText::FromString(RankingString));
 				
 				FInputModeUIOnly Mode;
-				Mode.SetWidgetToFocus(GameResultUI->GetCachedWidget());
 				SetInputMode(Mode);
 				
 				bShowMouseCursor = true;

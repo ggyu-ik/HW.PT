@@ -130,61 +130,58 @@ void APTPlayerCharacter::AttackInput(const FInputActionValue& Value)
 	}
 }
 
+void APTPlayerCharacter::ServerRPCCheckAttackHit_Implementation()
+{
+	CheckAttackHit();
+}
+
 void APTPlayerCharacter::CheckAttackHit()
 {
-	if (HasAuthority())
+	if (!HasAuthority())
 	{
-		TArray<FHitResult> OutHitResults;
-		TSet<ACharacter*> DamagedCharacters;
-		FCollisionQueryParams Params(NAME_None, false, this);
+		return;
+	}
 	
-		const float AttackRange = 50.f;
-		const float AttackRadius = 50.f;
-	
-		const FVector Forward = GetActorForwardVector();
-		const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
-		const FVector End = Start + GetActorForwardVector() * AttackRange;
+	TArray<FHitResult> OutHitResults;
+	TSet<ACharacter*> DamagedCharacters;
+	FCollisionQueryParams Params(NAME_None, false, this);
 
-		bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(AttackRadius), Params);
-	
-		if (bIsHitDetected == true)
+	const float AttackRange = 50.f;
+	const float AttackRadius = 50.f;
+
+	const FVector Forward = GetActorForwardVector();
+	const FVector Start = GetActorLocation() + Forward * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	bool bIsHitDetected = GetWorld()->SweepMultiByChannel(OutHitResults, Start, End, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+	if (bIsHitDetected == true)
+	{
+		for (auto const& OutHitResult : OutHitResults)
 		{
-			for (auto const& OutHitResult : OutHitResults)
+			ACharacter* DamagedCharacter = Cast<ACharacter>(OutHitResult.GetActor());
+			if (IsValid(DamagedCharacter) == true)
 			{
-				ACharacter* DamagedCharacter = Cast<ACharacter>(OutHitResult.GetActor());
-				if (IsValid(DamagedCharacter) == true)
-				{
-					DamagedCharacters.Add(DamagedCharacter);
-				}
+				DamagedCharacters.Add(DamagedCharacter);
+			}
+		}
+	
+		for (auto const& DamagedCharacter : DamagedCharacters)
+		{
+			APTPlayerCharacter* HitPlayerCharacter = Cast<APTPlayerCharacter>(DamagedCharacter);
+			if (IsValid(HitPlayerCharacter))
+			{
+				HitPlayerCharacter->OnHitByAttack();
+				continue;
 			}
 		
-			for (auto const& DamagedCharacter : DamagedCharacters)
+			APTAICharacter* HitAICharacter = Cast<APTAICharacter>(DamagedCharacter);
+			if (IsValid(HitAICharacter))
 			{
-				APTPlayerCharacter* HitPlayerCharacter = Cast<APTPlayerCharacter>(DamagedCharacter);
-				if (IsValid(HitPlayerCharacter))
-				{
-					HitPlayerCharacter->OnHitByAttack();
-					continue;
-				}
-			
-				APTAICharacter* HitAICharacter = Cast<APTAICharacter>(DamagedCharacter);
-				if (IsValid(HitAICharacter))
-				{
-					HitAICharacter->OnHitByAttack();
-				}
+				HitAICharacter->OnHitByAttack();
 			}
 		}
 	}
-}
-
-void APTPlayerCharacter::DrawDebugMeleeAttack(const FColor& DrawColor, FVector TraceStart, FVector TraceEnd,
-	FVector Forward)
-{
-	const float MeleeAttackRange = 50.f;
-	const float MeleeAttackRadius = 50.f;
-	FVector CapsuleOrigin = TraceStart + (TraceEnd - TraceStart) * 0.5f;
-	float CapsuleHalfHeight = MeleeAttackRange * 0.5f;
-	DrawDebugCapsule(GetWorld(), CapsuleOrigin, CapsuleHalfHeight, MeleeAttackRadius, FRotationMatrix::MakeFromZ(Forward).ToQuat(), DrawColor, false, 5.0f);
 }
 
 void APTPlayerCharacter::ServerRPCAttack_Implementation()
@@ -203,7 +200,7 @@ void APTPlayerCharacter::ServerRPCAttack_Implementation()
 		
 			GetCharacterMovement()->SetMovementMode(MOVE_Walking);
 		}),
-		AttackMontagePlayTime + 0.5, // 공격 페널티 0.5초
+		AttackMontagePlayTime + 0.5,
 		false);
 	
 	PlayAttackMontage();
@@ -248,9 +245,13 @@ void APTPlayerCharacter::PlayAttackMontage()
 
 void APTPlayerCharacter::OnHitByAttack()
 {
-	APTGameStateBase* PTGS = Cast<APTGameStateBase>(GetWorld()->GetGameState());
+	if (!HasAuthority() || bIsDead)
+	{
+		return;
+	}
 	
-	if (!IsValid(PTGS) || PTGS->MatchState != EMatchState::Playing || !HasAuthority() || bIsDead)
+	APTGameStateBase* PTGS = Cast<APTGameStateBase>(GetWorld()->GetGameState());
+	if (!IsValid(PTGS) || PTGS->MatchState != EMatchState::Playing)
 	{
 		return;
 	}
@@ -267,23 +268,18 @@ void APTPlayerCharacter::OnHitByAttack()
 	
 	bIsDead = true;
 		
-	// 모든 클라이언트에 사망 처리
 	MulticastRPCDie();
 	
-	// 바로 Destroy
 	Destroy();
 }
 
 void APTPlayerCharacter::MulticastRPCDie_Implementation()
 {
-	// 이동 비활성화
 	GetCharacterMovement()->DisableMovement();
 	GetCharacterMovement()->StopMovementImmediately();
 	
-	// 콜리전 비활성화
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	// 입력 비활성화
 	if (IsLocallyControlled())
 	{
 		DisableInput(Cast<APlayerController>(GetController()));

@@ -32,6 +32,6 @@ void UPTCharacterAnimInstance::AnimNotify_CheckAttackHit()
 {
 	if (IsValid(OwnerPlayerCharacter))
 	{
-		OwnerPlayerCharacter->CheckAttackHit();
+		OwnerPlayerCharacter->ServerRPCCheckAttackHit();
 	}
 }
