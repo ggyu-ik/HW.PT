@@ -17,14 +17,14 @@ AAISpawnBox::AAISpawnBox()
 	SpawningBox->SetCollisionEnabled(ECollisionEnabled::NoCollision); // 스폰 박스는 충돌 불필요	
 }
 
-void AAISpawnBox::SpawnAICharacter()
+void AAISpawnBox::SpawnAICharacter(int32 SpawnCount)
 {
 	if (!IsValid(AICharacterClass) || !IsValid(SpawningBox))
 	{
 		return;
 	}
 	
-	for (int32 i = 0; i < 10; i++)
+	for (int32 i = 0; i < SpawnCount; i++)
 	{
 		FVector SpawnLocation = GetRandomSpawnLocation();
 		FRotator SpawnRotation = FRotator::ZeroRotator;

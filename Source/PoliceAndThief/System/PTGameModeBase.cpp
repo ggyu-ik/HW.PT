@@ -41,6 +41,7 @@ void APTGameModeBase::PostLogin(APlayerController* NewPlayer)
 	if (IsValid(PTPC))
 	{
 		AlivePlayerControllers.Add(PTPC);
+		RemainWaitingTimeForPlaying = WaitingTime;
 	}
 }
 
@@ -58,6 +59,15 @@ void APTGameModeBase::Logout(AController* Exiting)
 
 void APTGameModeBase::OnCharacterDead(APTPlayerController* InController)
 {
+	if (!IsValid(InController) || AlivePlayerControllers.Find(InController) == INDEX_NONE)
+	{
+		return;
+	}
+	
+	InController->ClientRPCShowGameResultWidget(AlivePlayerControllers.Num());
+	
+	AlivePlayerControllers.Remove(InController);
+	DeadPlayerControllers.Add(InController);
 }
 
 void APTGameModeBase::OnMainTimerElapsed()
@@ -85,7 +95,7 @@ void APTGameModeBase::OnMainTimerElapsed()
 			}
 			else
 			{
-				NotificationString = FString::Printf(TEXT("게임시작 %d초 전"), RemainWaitingTimeForPlaying);
+				NotificationString = FString::Printf(TEXT("게임시작 %d초 전"), RemainWaitingTimeForPlaying - 1);
 				--RemainWaitingTimeForPlaying;
 			}
 			
@@ -104,7 +114,6 @@ void APTGameModeBase::OnMainTimerElapsed()
 		{
 			if (!bAlreadySpawned)
 			{
-				// 레벨에서 SpawnBox 찾기
 				if (!IsValid(SpawnBox))
 				{
 					TArray<AActor*> FoundActors;
@@ -125,10 +134,9 @@ void APTGameModeBase::OnMainTimerElapsed()
 				}
 				
 				if (IsValid(SpawnBox))
-				{
-					SpawnBox->SpawnAICharacter();
+				{					
+					SpawnBox->SpawnAICharacter(30);
 					bAlreadySpawned = true;
-					UE_LOG(LogTemp, Warning, TEXT("AI 스폰됨"));
 				}
 			}
 			
@@ -150,7 +158,7 @@ void APTGameModeBase::OnMainTimerElapsed()
 		
 	case EMatchState::Ending:
 		{
-			FString NotificationString = FString::Printf(TEXT("타이틀 메뉴까지 %d초 남았습니다."), RemainWaitingTimeForEnding);
+			FString NotificationString = FString::Printf(TEXT("타이틀 메뉴까지 %d초 남았습니다."), RemainWaitingTimeForEnding - 1);
 			
 			NotifyToAllPlayer(NotificationString);
 			

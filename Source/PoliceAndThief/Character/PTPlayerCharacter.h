@@ -9,6 +9,7 @@ class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
 class UCameraComponent;
+class UAnimMontage;
 
 UCLASS()
 class POLICEANDTHIEF_API APTPlayerCharacter : public ACharacter
@@ -20,10 +21,9 @@ public:
 
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 #pragma region Component
 	
 protected:
@@ -53,11 +53,40 @@ private:
 	void LookInput(const FInputActionValue& Value);
 	
 	void AttackInput(const FInputActionValue& Value);
+#pragma endregion
+	
+#pragma region Attack
+	
+public:
+	void CheckAttackHit();
+	
+	void OnHitByAttack();
+private:
+	void DrawDebugMeleeAttack(const FColor& DrawColor, FVector TraceStart, FVector TraceEnd, FVector Forward);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPCAttack();
+	
+	UFUNCTION(NetMulticast, Unreliable)
+	void MulticastRPCAttack();
+	
+	UFUNCTION()
+	void OnRep_CanAttack();
+	
+	void PlayAttackMontage();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPCAttack();
+	void MulticastRPCDie();
+	
+protected:
+	UPROPERTY(ReplicatedUsing = OnRep_CanAttack)
+	uint8 bCanAttack : 1;
+	
+	bool bIsDead;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackMontage;
+	
+	float AttackMontagePlayTime;
 #pragma endregion
 };

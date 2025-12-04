@@ -17,7 +17,7 @@ public:
 	AAISpawnBox();
 	
 	UFUNCTION()
-	void SpawnAICharacter();
+	void SpawnAICharacter(int32 SpawnCount);
 	
 	FVector GetRandomSpawnLocation();
 

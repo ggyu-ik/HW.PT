@@ -13,4 +13,12 @@ public:
 	APTAICharacter();
 	
 	virtual void BeginPlay() override;
+	
+	void OnHitByAttack();
+
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPCDie();
+	
+	bool bIsDead;
 };

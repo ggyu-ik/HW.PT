@@ -24,7 +24,7 @@ public:
 	FTimerHandle MainTimerHandle;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int32 WaitingTime = 5;
+	int32 WaitingTime = 10;
 	
 	int32 RemainWaitingTimeForPlaying;
 	

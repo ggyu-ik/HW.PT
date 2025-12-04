@@ -2,11 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "Character/PTPlayerCharacter.h"
 #include "PTCharacterAnimInstance.generated.h"
 
+class ACharacter;
 class APTPlayerCharacter;
-class APTPlayerCharacterMovementComponent;
+class UCharacterMovementComponent;
 
 UCLASS()
 class POLICEANDTHIEF_API UPTCharacterAnimInstance : public UAnimInstance
@@ -19,6 +19,9 @@ public:
 protected:
 	UPROPERTY()
 	TObjectPtr<ACharacter> OwnerCharacter;
+	
+	UPROPERTY()
+	TObjectPtr<APTPlayerCharacter> OwnerPlayerCharacter;
 	
 	UPROPERTY()
 	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMovementComponent;
@@ -34,4 +37,7 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bIsFalling : 1;
+	
+	UFUNCTION()
+	void AnimNotify_CheckAttackHit();
 };
